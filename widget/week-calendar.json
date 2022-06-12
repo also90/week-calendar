@@ -1,0 +1,79 @@
+{
+    "template": "<style>
+ div.left-column {
+ text-align: right; 
+ margin-left: 5px;
+  }
+  div.right-column {
+  text-align: left;
+   margin-left: 25px;  
+  }
+  div.event-date {
+   font-size: 18px;
+   color: {{config.CalendarGlobalHighlightColor_1}};
+  }
+  div.event-day {
+   font-size: 14px;
+  }
+  div.event-summary {
+   font-size: 18px;
+   color: {{config.CalendarGlobalHighlightColor_1}};
+   white-space: nowrap;
+   overflow: hidden; 
+   text-overflow: ellipsis;
+  }
+  div.event-time {
+   font-size: 14px;
+   font-weight: bold;
+  }
+  div.event-location {
+   font-size: 14px;
+   white-space: nowrap;
+   overflow: hidden; 
+   text-overflow: ellipsis;
+  }  
+ hr.event-divider { 
+   border: 0; 
+   height: 1px; 
+   background-image: -webkit-linear-gradient(left, #212124, #666666, #FFFFFF, #666666, #212124);
+ }
+</style>
+
+<div class=\"row\">
+	<div class=\"col col-sm-2 left-column\">
+    <div class=\"row event-date\">
+    	Monday {{itemValue(config.CalenderCurMonay)}}
+    </div>
+    </div>
+</div>
+<div class=\"row\">
+ <div class=\"row event-summary\">
+      <span ng-if=\"(config.CalendarGlobalShowSummary) \"> {{itemValue(config.CalendarEventSummary)}}</span>
+    </div>
+</div>
+",
+    "name": "Week Calendar",
+    "settings": [
+        {
+            "type": "heading",
+            "id": "GlobalSettings",
+            "label": "Global settings"
+        },
+        {
+            "type": "checkbox",
+            "id": "CalendarGlobalShowSummary",
+            "default": true,
+            "label": "Show Event Summary"
+        },
+        {
+            "type": "item",
+            "id": "CalendarCurMonday",
+            "label": "Calendar Current Monday",
+            "default": ""
+        }
+         ],
+    "author": "Alexander Sohr",
+    "source_url": "https://raw.githubusercontent.com/.json",
+    "readme_url": "https://github.com/",
+    "description": "Displays one week calendar events"
+}
