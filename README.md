@@ -42,4 +42,4 @@ A HABpanel widget for displaying the items of 4 calendars of the current week. I
     DateTime        FamilyCal_Mon_End         "Datum  [%1$tH.%1$tM.%1$ts]"    <calendar>      (FamilyCal, CurCalMon) ["EndTime"]  
    ```
   
-    4.  Configure the widget in HABPanel using the created groups and items. 
+ 4.  Configure the widget in HABPanel using the created groups and items. 
