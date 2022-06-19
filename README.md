@@ -6,7 +6,7 @@ A HABpanel widget for displaying the items of 4 calendars of the current week. I
 
 1. Install the widget [week-calendar.json](widget/week-calendar.json) using the HABPanel settings
 2. copy the javascript [week-calendar.js](week-calendar.js) into the openhab-config html-folder **<openhab-config>/html/week-calendar/**
-3. Create OpenHAB Groups and Items, see [items/week-calendar.items]([items/week-calendar.items])
+3. Create OpenHAB Groups and Items, see [items/week-calendar.items]([/items/week-calendar.items])
   - Group examples:
     - ```Group CurDate```
     - weekday groups
