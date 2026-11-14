@@ -1,0 +1,67 @@
+<!-- Week Calendar – Markup für das HABPanel-Widget (wird per ng-include geladen) -->
+<style>
+.wkc { height: 100%; display: flex; flex-direction: column; font-size: {{config.fontSize || 14}}px; text-align: left; overflow: hidden; }
+.wkc-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px 6px; }
+.wkc-title { font-size: 1.3em; color: {{config.highlight || '#4fc3f7'}}; }
+.wkc-meta { font-size: 0.8em; opacity: 0.6; }
+.wkc-legend span { display: inline-block; margin-left: 10px; font-size: 0.85em; }
+.wkc-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; }
+.wkc-grid { flex: 1; display: flex; gap: 4px; min-height: 0; }
+.wkc-day { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
+.wkc-day.today { background: rgba(255,255,255,0.10); box-shadow: inset 0 3px 0 {{config.highlight || '#4fc3f7'}}; }
+.wkc-dayhead { padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.12); white-space: nowrap; }
+.wkc-dayhead b { font-size: 1.15em; }
+.wkc-day.today .wkc-dayhead b { color: {{config.highlight || '#4fc3f7'}}; }
+.wkc-dayhead span { opacity: 0.6; margin-left: 4px; font-size: 0.85em; }
+.wkc-events { flex: 1; overflow-y: auto; padding: 3px; }
+.wkc-ev { border-left: 4px solid; padding: 2px 5px; margin-bottom: 4px; background: rgba(0,0,0,0.25); border-radius: 0 3px 3px 0; }
+.wkc-ev.allday { background: rgba(255,255,255,0.10); }
+.wkc-time { font-size: 0.8em; font-weight: bold; opacity: 0.85; }
+.wkc-sum, .wkc-loc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wkc-loc { font-size: 0.8em; opacity: 0.7; }
+.wkc-empty { opacity: 0.35; text-align: center; padding-top: 6px; }
+.wkc-err { color: #e57373; font-size: 0.85em; }
+.wkc-nav { display: inline-flex; gap: 4px; margin-right: 10px; vertical-align: middle; }
+.wkc-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: inherit; border-radius: 4px; padding: 2px 10px; font-size: 1em; line-height: 1.4; cursor: pointer; }
+.wkc-btn:hover { background: rgba(255,255,255,0.18); }
+.wkc-btn[disabled] { opacity: 0.3; cursor: default; }
+.wkc-btn.home { font-size: 0.8em; }
+.wkc-rel { font-size: 0.8em; color: {{config.highlight || '#4fc3f7'}}; margin-left: 6px; }
+</style>
+<div class="wkc">
+  <div style="height:100%; display:flex; flex-direction:column;">
+    <div ng-if="wc.error" class="wkc-err">{{wc.error}}</div>
+    <div class="wkc-head" ng-if="wc.week">
+      <div>
+        <span class="wkc-nav">
+          <button class="wkc-btn" ng-click="wc.prev()" ng-disabled="!wc.canPrev()" title="Vorige Woche">&#8249;</button>
+          <button class="wkc-btn home" ng-click="wc.home()" ng-disabled="wc.offset === 0" title="Aktuelle Woche">Heute</button>
+          <button class="wkc-btn" ng-click="wc.next()" ng-disabled="!wc.canNext()" title="Nächste Woche">&#8250;</button>
+        </span>
+        <span class="wkc-title">KW {{wc.week.week}}</span>
+        <span class="wkc-meta">{{wc.week.from}} – {{wc.week.to}} · Stand {{wc.data.updated}}</span>
+        <span class="wkc-rel" ng-if="wc.offset === -1">letzte Woche</span>
+        <span class="wkc-rel" ng-if="wc.offset === 1">nächste Woche</span>
+        <span class="wkc-rel" ng-if="wc.offset < -1">vor {{-wc.offset}} Wochen</span>
+        <span class="wkc-rel" ng-if="wc.offset > 1">in {{wc.offset}} Wochen</span>
+        <span class="wkc-err" ng-if="wc.data.errors.length"> · Fehler: {{wc.data.errors.join(', ')}}</span>
+      </div>
+      <div class="wkc-legend" ng-if="config.showLegend !== false">
+        <span ng-repeat="c in wc.data.calendars"><i ng-style="{'background': c.color}"></i>{{c.name}}</span>
+      </div>
+    </div>
+    <div class="wkc-grid" ng-if="wc.week">
+      <div class="wkc-day" ng-repeat="day in wc.week.days track by day.date" ng-class="{today: wc.isToday(day)}">
+        <div class="wkc-dayhead"><b>{{day.label}}</b><span>{{day.day}}</span></div>
+        <div class="wkc-events">
+          <div class="wkc-ev" ng-repeat="ev in day.events" ng-class="{allday: ev.allDay}" ng-style="{'border-left-color': ev.color}" title="{{ev.cal}}: {{ev.title}}{{ev.loc ? ' @ ' + ev.loc : ''}}">
+            <div class="wkc-time">{{ev.time}}</div>
+            <div class="wkc-sum">{{ev.title}}</div>
+            <div class="wkc-loc" ng-if="config.showLocation !== false && ev.loc">{{ev.loc}}</div>
+          </div>
+          <div class="wkc-empty" ng-if="!day.events.length">–</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
