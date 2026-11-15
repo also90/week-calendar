@@ -1,43 +1,45 @@
 # week-calendar
 
-Ein HABPanel-Widget für openHAB, das die Termine der aktuellen Woche (Mo–So) aus mehreren ICS-Kalendern anzeigt: Nextcloud, Google oder jede andere iCal-Adresse. Getestet mit openHAB 5.2.
+A HABPanel widget for openHAB that shows the events of the current week (Mon–Sun) from several ICS calendars: Nextcloud, Google or any other iCal URL. Tested with openHAB 5.2.
 
-- 7 Spalten mit Kalenderwoche und Legende, der heutige Tag ist hervorgehoben
-- Buttons ‹ Heute › zum Blättern: standardmäßig 4 Wochen zurück und 12 voraus (`WEEKS_BACK` / `WEEKS_AHEAD` in der Regel)
-- ein Farbbalken je Kalender, Uhrzeit, Titel und Ort
-- wiederkehrende Termine (RRULE) und verschobene Einzeltermine (RECURRENCE-ID)
-- ganztägige und mehrtägige Termine
-- Nextcloud-Kontaktgeburtstage per Login mit App-Passwort
+- 7 columns with calendar week and legend, today is highlighted
+- ‹ Today › buttons to browse weeks: 4 weeks back and 12 ahead by default (`WEEKS_BACK` / `WEEKS_AHEAD` in the rule)
+- one color bar per calendar, plus time, title and location
+- recurring events (RRULE) and moved single occurrences (RECURRENCE-ID)
+- all-day and multi-day events
+- Nextcloud contact birthdays via login with an app password
 
-## Funktionsweise
+The widget labels and log messages are in German (e.g. „Heute“, „ganztägig“, „KW“).
+
+## How it works
 
 ```
-ICS-Kalender ──► JS-Regel (automation/js/week-calendar.js, ical.js)
-                       │  alle 15 min, nach Mitternacht, beim Start, per Refresh-Item
-                       ▼
-                 String-Item WeekCalendar_Json   (alle Wochen als JSON)
-                       ▼
-                 HABPanel-Widget (widget/week-calendar.json lädt html/week-calendar/*.js + *.html)
+ICS calendars ──► JS rule (automation/js/week-calendar.js, ical.js)
+                        │  every 15 min, after midnight, on startup, via refresh item
+                        ▼
+                  String item WeekCalendar_Json   (all weeks as JSON)
+                        ▼
+                  HABPanel widget (widget/week-calendar.json loads html/week-calendar/*.js + *.html)
 ```
 
-Statt wie früher 4 Items pro Tag und Kalender gibt es nur noch ein Item. Die Regel holt die Kalender, löst die Wiederholungen auf und schreibt alle Wochen des Bereichs hinein. Das Widget zeigt sie nur noch an und blättert direkt im Browser, ohne neu zu laden.
+The old version needed 4 items per day and calendar; now there is a single item. The rule fetches the calendars, expands recurrences and writes all weeks of the range into the item. The widget only displays them and switches weeks directly in the browser, without reloading.
 
-## Voraussetzungen
+## Requirements
 
-- openHAB mit den Add-ons **JavaScript Scripting** (`jsscripting`) und **HABPanel**
-- `npm` auf dem openHAB-Host, um `ical.js` zu installieren
+- openHAB with the **JavaScript Scripting** (`jsscripting`) and **HABPanel** add-ons
+- `npm` on the openHAB host to install `ical.js`
 
 ## Installation
 
-Die Pfade gelten für eine apt-/Paket-Installation (`/etc/openhab`). Bei Docker oder manuellen Installationen ist es entsprechend `conf/…`.
+The paths below are for an apt/package installation (`/etc/openhab`). For Docker or manual installations use `conf/…` instead.
 
-1. **ical.js installieren**
+1. **Install ical.js**
    ```bash
    cd /etc/openhab/automation/js
    npm install ical.js@2
    ```
 
-2. **Dateien kopieren**
+2. **Copy the files**
    ```bash
    cp items/week-calendar.items              /etc/openhab/items/
    cp automation/js/week-calendar.js         /etc/openhab/automation/js/
@@ -45,40 +47,40 @@ Die Pfade gelten für eine apt-/Paket-Installation (`/etc/openhab`). Bei Docker 
    cp html/week-calendar/week-calendar.*     /etc/openhab/html/week-calendar/
    ```
 
-3. **Kalender eintragen:** im `CALENDARS`-Array oben in `automation/js/week-calendar.js`, mit `name`, `color` und `url`. Kalender ohne `url` werden übersprungen.
+3. **Add your calendars** to the `CALENDARS` array at the top of `automation/js/week-calendar.js`, each with `name`, `color` and `url`. Calendars without a `url` are skipped.
 
-   | Quelle | URL |
+   | Source | URL |
    |---|---|
-   | Nextcloud (öffentlich geteilt) | Kalender → Teilen → Link teilen → „Abonnement-Link kopieren“, ergibt `https://<cloud>/remote.php/dav/public-calendars/<token>?export` |
-   | Nextcloud (privat, z. B. Kontaktgeburtstage) | `https://<cloud>/remote.php/dav/calendars/<user>/contact_birthdays/?export` mit `user` und `passwordFile` |
-   | Google | Kalendereinstellungen → „Privatadresse im iCal-Format“ |
-   | `webcal://…` | wird automatisch zu `https://…` |
+   | Nextcloud (shared publicly) | Calendar → Share → Share link → “Copy subscription link”, which gives `https://<cloud>/remote.php/dav/public-calendars/<token>?export` |
+   | Nextcloud (private, e.g. contact birthdays) | `https://<cloud>/remote.php/dav/calendars/<user>/contact_birthdays/?export` with `user` and `passwordFile` |
+   | Google | Calendar settings → “Secret address in iCal format” |
+   | `webcal://…` | converted to `https://…` automatically |
 
-   **Login:** Lege in Nextcloud unter Persönliche Einstellungen → Sicherheit ein App-Passwort an und schreibe es in die Datei aus `passwordFile`:
+   **Login:** In Nextcloud, create an app password under Personal settings → Security and write it to the file set in `passwordFile`:
    ```bash
-   echo 'APP-PASSWORT' > /etc/openhab/automation/js/week-calendar.secret
+   echo 'APP-PASSWORD' > /etc/openhab/automation/js/week-calendar.secret
    chmod 640 /etc/openhab/automation/js/week-calendar.secret
    ```
-   Als `user` trägst du den Nextcloud-**Login-Namen** ein. Achte auf Groß- und Kleinschreibung, sonst lehnt Nextcloud die Anmeldung mit 401 ab.
+   Set `user` to your Nextcloud **login name**. Upper and lower case matter; otherwise Nextcloud rejects the login with a 401.
 
-4. **Widget importieren:** HABPanel → Einstellungen → Widgets → „Import from file“ → `widget/week-calendar.json`. Danach legst du es auf einem Dashboard an, am besten in voller Breite.
-   Das Widget selbst ist nur ein kleiner Lader. Aussehen und Logik liegen in `html/week-calendar/` und werden ohne Browser-Cache geladen. Änderungen dort sind nach einem Neuladen der Seite sichtbar, ohne erneuten Import.
+4. **Import the widget:** HABPanel → Settings → Widgets → “Import from file” → `widget/week-calendar.json`. Then add it to a dashboard, ideally at full width.
+   The widget itself is only a small loader. Layout and logic live in `html/week-calendar/` and are loaded bypassing the browser cache, so changes there show up after a page reload, without importing again.
 
-5. **Testen:** `WeekCalendar_Refresh` auf ON schalten. Der Schalter bleibt an, solange geladen wird, und geht danach von selbst auf OFF. Im `openhab.log` erscheint dann
+5. **Test:** Switch `WeekCalendar_Refresh` to ON. The switch stays on while loading and turns OFF by itself when done. `openhab.log` then shows
    `Wochenkalender KW 46 aktualisiert (17 Wochen, 5 Kalender, 0 Fehler)`.
-   Kann ein Kalender nicht geladen werden, steht eine Warnung im Log und das Widget zeigt oben „Fehler: <Name>“.
+   If a calendar cannot be loaded, the log shows a warning and the widget shows „Fehler: <name>“ at the top.
 
-## Widget-Einstellungen
+## Widget settings
 
-| Einstellung | Standard |
+| Setting | Default |
 |---|---|
-| JSON-Item | `WeekCalendar_Json` |
-| Akzentfarbe (heute/Titel) | `#4fc3f7` |
-| Schriftgröße (px) | 14 |
-| Ort anzeigen | an |
-| Legende anzeigen | an |
+| JSON item | `WeekCalendar_Json` |
+| Accent color (today/title) | `#4fc3f7` |
+| Font size (px) | 14 |
+| Show location | on |
+| Show legend | on |
 
-## Format von WeekCalendar_Json
+## Format of WeekCalendar_Json
 
 ```json
 {
@@ -97,12 +99,12 @@ Die Pfade gelten für eine apt-/Paket-Installation (`/etc/openhab`). Bei Docker 
 }
 ```
 
-`current` ist der Index der aktuellen Woche in `weeks`, `offset` gibt den Abstand zur aktuellen Woche an.
+`current` is the index of the current week in `weeks`; `offset` is the distance to the current week. For older widget versions, the JSON also contains the current week at the top level (`week`, `from`, `to`, `days`).
 
-**Tipp:** Wenn deine Persistenz alle Items speichert (z. B. InfluxDB mit `*`), schließe `WeekCalendar_Json` aus. Sonst landet bei jedem Lauf ein JSON von etwa 15 KB in der Datenbank.
+**Tip:** If your persistence stores all items (e.g. InfluxDB with `*`), exclude `WeekCalendar_Json`. Otherwise every run writes about 15 KB of JSON to the database.
 
-Das Item lässt sich auch in anderen Oberflächen wie der Main UI verwenden.
+The item can also be used in other UIs such as the Main UI.
 
-## Danksagung
+## Credits
 
-Inspiriert vom Widget [calendar-five-events](https://github.com/davorf/calendar-five-events) von davorf.
+Inspired by the [calendar-five-events](https://github.com/davorf/calendar-five-events) widget by davorf.
